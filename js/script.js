@@ -3,43 +3,80 @@ const MynameIs = document.getElementById('name').focus()
 var jobSelect = document.getElementById('title')
 var otherJob = document.getElementById('other-job-role')
 //Job Role
-otherJob.style.visibility = 'hidden'
+
 jobSelect.addEventListener('change', (e) => {
   if (e.target.value == 'other') {
-    otherJob.style.visibility = 'visible'
-    jobSelect.style.visibility = 'hidden'
+    otherJob.style.visibility = 'visible';
+    // Hide options in the Job Role select field
+    for (let i = 0; i < jobSelect.options.length; i++) {
+      jobSelect.options[i].style.display = 'none';
+    }
   } else {
-    jobSelect.style.visibility = 'visible'
-    otherJob.style.visibility = 'hidden'
+    otherJob.style.visibility = 'hidden';
+    // Show options in the Job Role select field
+    for (let i = 0; i < jobSelect.options.length; i++) {
+      jobSelect.options[i].style.display = 'block';
+    }
   }
-})
-//T-Shirt Info
-const design = document.querySelector('#design')
-const color = document.querySelector('#color')
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Disable the Color field initially
+  color.setAttribute('disabled', true);
+});
+
+// T-Shirt Info
+const design = document.querySelector('#design');
+const color = document.querySelector('#color');
+
 design.addEventListener('change', function () {
+  // Enable the Color field when a Design is selected
+  color.removeAttribute('disabled');
+
+  // Update the Color field based on the selected Design
+  updateColorOptions();
+});
+
+function updateColorOptions() {
   // Enable all color options first
-  for (var i = 0; i < color.options.length; i++) {
-    color.options[i].disabled = false
+  for (let i = 0; i < color.options.length; i++) {
+    color.options[i].disabled = false;
   }
+
   // Disable color options based on the selected design
   if (design.value === 'heart js') {
-    for (var i = 0; i < color.options.length; i++) {
-      if (color.options[i].getAttribute('data-theme') !== 'heart js') {
-        color.options[i].disabled = true
-      }
-    }
+    setColorOptions(['tomato', 'steelblue', 'dimgrey']);
   } else if (design.value === 'js puns') {
-    for (var i = 0; i < color.options.length; i++) {
-      if (color.options[i].getAttribute('data-theme') !== 'js puns') {
-        color.options[i].disabled = true
-      }
-    }
+    setColorOptions(['cornflowerblue', 'darkslategrey', 'gold']);
+  } else {
+    // If no design is selected, disable the Color field again
+    color.setAttribute('disabled', true);
   }
-})
+}
+
+function setColorOptions(validColors) {
+  // Disable color options that are not valid for the current design
+  for (let i = 0; i < color.options.length; i++) {
+    const optionValue = color.options[i].value;
+    color.options[i].disabled = !validColors.includes(optionValue);
+  }
+
+  // If the currently selected color is not valid, reset the Color field
+  if (!validColors.includes(color.value)) {
+    color.selectedIndex = 0;
+  }
+}
+
+// Initial setup on page load
+updateColorOptions();
+
+
 // Register for Activities section
-const activitiesBox = document.getElementById('activities-box')
+
+// - Tracks and updates the total cost of selected activities dynamically.
 const totalCostElement = document.getElementById('activities-cost')
 let totalCost = 0
+const activitiesBox = document.getElementById('activities-box');
 activitiesBox.addEventListener('change', (e) => {
   if (e.target.type === 'checkbox') {
     const isChecked = e.target.checked
@@ -58,6 +95,7 @@ const payPal = document.getElementById('paypal')
 const bitCoin = document.getElementById('bitcoin')
 payPal.style.display = 'none'
 bitCoin.style.display = 'none'
+// - Shows/hides payment options based on the payment method.
 payForm.addEventListener('change', function () {
   const selectedPay = payForm.value
   if (selectedPay === 'credit-card') {
@@ -71,19 +109,41 @@ payForm.addEventListener('change', function () {
     bitCoin.style.display = 'block'
   }
 })
+
 //Form Validation section
-const nameInput = document.getElementById('name')
-var emailInput = document.getElementById('email')
+
+const form = document.querySelector('form');
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const cardNumberInput = document.getElementById('cc-num');
+const zipCodeInput = document.getElementById('zip');
+const cvvInput = document.getElementById('cvv');
+
+// Add submit event listener to the form
+form.addEventListener('submit', function (e) {
+  // Validate each input field
+  const isNameValid = validName();
+  const isEmailValid = validEmail();
+  const isActivityValid = activity();
+  const isCardNumberValid = cc();
+  const isZipCodeValid = zip();
+  const isCvvValid = cvv();
+
+  // If any validation fails, prevent form submission
+  if (!isNameValid || !isEmailValid || !isActivityValid || !isCardNumberValid || !isZipCodeValid || !isCvvValid) {
+    e.preventDefault();
+  }
+});
+
 var activitiesInput = document.getElementById('activities')
-var cardNumberInput = document.getElementById('cc-num')
-var zipCodeInput = document.getElementById('zip')
-var cvvInput = document.getElementById('cvv')
 var formInput = document.getElementsByTagName('form')
 const nameHint = document.getElementById('name-hint')
 const emailHint = document.getElementById('email-hint')
+// - Performs validation for named 
 
 function validName() {
   const regex = /^[a-zA-Z ]{2,30}$/
+  // - Returns boolean values indicating the validity of each input.
   if (!regex.test(nameInput.value)) {
     nameInput.classList.add('error-border')
     nameHint.style.display = 'inline'
@@ -94,20 +154,12 @@ function validName() {
     return true
   }
 }
-// Event listener to prevent form submission
-addEventListener('keyup', (e) => {
-  if (!validName()) {
-    e.preventDefault()
-  }
-})
-addEventListener('submit', (e) => {
-  if (!validName()) {
-    e.preventDefault()
-  }
-})
+// - Performs validation for email.
+
 
 function validEmail() {
   const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+  // - Returns boolean values indicating the validity of each input.
   if (!regex.test(emailInput.value)) {
     emailInput.classList.add('error-border')
     emailHint.style.display = 'inline'
@@ -117,16 +169,6 @@ function validEmail() {
     return true
   }
 }
-addEventListener('keyup', (e) => {
-  if (!validEmail()) {
-    e.preventDefault()
-  }
-})
-addEventListener('submit', (e) => {
-  if (!validEmail()) {
-    e.preventDefault()
-  }
-})
 
 function activity() {
   const activityHint = document.getElementById('activities-hint')
@@ -137,11 +179,6 @@ function activity() {
     activityHint.style.display = 'none'
   }
 }
-addEventListener('submit', (e) => {
-  if (!activity()) {
-    e.preventDefault()
-  }
-})
 
 function cc() {
   //const cc = document.getElementById('cc-num');
@@ -155,11 +192,6 @@ function cc() {
     return true
   }
 }
-addEventListener('submit', (e) => {
-  if (!cc()) {
-    e.preventDefault()
-  }
-})
 
 function zip() {
   const zipHint = document.getElementById('zip-hint')
@@ -172,11 +204,6 @@ function zip() {
     return true
   }
 }
-addEventListener('submit', (e) => {
-  if (!zip()) {
-    e.preventDefault()
-  }
-})
 
 function cvv() {
   const cvvHint = document.getElementById('cvv-hint')
@@ -189,21 +216,18 @@ function cvv() {
     return true
   }
 }
-addEventListener('submit', (e) => {
-  if (!cvv()) {
-    e.preventDefault()
-  }
-})
-// Accessability
-const accessibility = document.querySelectorAll("[type='checkbox']")
+
+// Accessibility
+const accessibility = document.querySelectorAll("[type='checkbox']");
 for (let i = 0; i < accessibility.length; i++) {
   accessibility[i].addEventListener('focus', function () {
-    this.parentElement.classList.add('focus')
-  })
+    this.parentElement.classList.add('focus');
+  });
   accessibility[i].addEventListener('blur', function () {
-    this.parentElement.classList.remove('focus')
-  })
+    this.parentElement.classList.remove('focus');
+  });
 }
+
 const formOfLastChild = formInput[formInput.length - 1]
 const isNameValid = validName()
 formOfLastChild.addEventListener('submit', function (event) {
@@ -216,3 +240,63 @@ formOfLastChild.addEventListener('submit', function (event) {
     formOfLastChild.classList.add('valid')
   }
 })
+
+
+// Function to toggle error styling and display error messages
+function showError(inputElement, errorElement, message) {
+  inputElement.classList.add('error-border');
+  errorElement.textContent = message;
+  errorElement.style.display = 'inline';
+}
+
+// Function to toggle valid styling and hide error messages
+function showValid(inputElement, errorElement) {
+  inputElement.classList.remove('error-border');
+  errorElement.style.display = 'none';
+}
+
+// Function to validate name input
+function validName() {
+  const nameInput = document.getElementById('name');
+  const nameHint = document.getElementById('name-hint');
+  const regex = /^[a-zA-Z ]{2,30}$/;
+
+  if (!regex.test(nameInput.value.trim())) {
+    showError(nameInput, nameHint, 'Name field cannot be blank');
+    return false;
+  } else {
+    showValid(nameInput, nameHint);
+    return true;
+  }
+}
+
+// Function to validate email input
+function validEmail() {
+  const emailInput = document.getElementById('email');
+  const emailHint = document.getElementById('email-hint');
+  const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+  if (!regex.test(emailInput.value.trim())) {
+    showError(emailInput, emailHint, 'Email address must be formatted correctly');
+    return false;
+  } else {
+    showValid(emailInput, emailHint);
+    return true;
+  }
+}
+
+// Attach event listeners to validate input on user interaction
+document.getElementById('name').addEventListener('input', validName);
+document.getElementById('email').addEventListener('input', validEmail);
+
+// Attach a submit event listener to the form
+document.querySelector('form').addEventListener('submit', function (e) {
+  // Validate each input field
+  const isNameValid = validName();
+  const isEmailValid = validEmail();
+
+  // If any validation fails, prevent form submission
+  if (!isNameValid || !isEmailValid) {
+    e.preventDefault();
+  }
+});
