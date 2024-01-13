@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('name').focus()
-
   const form = document.querySelector('form')
   const nameInput = document.getElementById('name')
   const emailInput_ok = document.getElementById('email')
@@ -10,7 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const activitiesHint = document.querySelector('.activities-hint.hint')
   const activitiesBox = document.getElementById('activities')
   const totalCostElement = document.getElementById('activities-cost')
-
+  const creditCardBox = document.querySelector('.credit-card-box')
+  const creditCard = document.getElementById('credit-card')
+  const payForm = document.getElementById('payment')
+  const payPal = document.getElementById('paypal')
+  const bitCoin = document.getElementById('bitcoin')
   const checkboxes = activitiesBox.querySelectorAll("input[type='checkbox']")
   let totalCost = 0
 
@@ -61,16 +64,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function showError(inputElement, message) {
-    const errorHint = inputElement.nextElementSibling
-    errorHint.textContent = message
-    errorHint.style.display = 'block'
+    const errorSibling = inputElement.nextElementSibling
+    errorSibling.textContent = message
+    errorSibling.style.display = 'block'
     return false
   }
 
   function updateTotalCost() {
     totalCostElement.textContent = `Total: $${totalCost}`
   }
-
   // Accessability
   function Accessability() {
     const accessibility = document.querySelectorAll("[type='checkbox']")
@@ -87,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function verify(validElement, element) {
     const parentElement = element.parentElement
-
     if (validElement) {
       parentElement.classList.add('valid')
       parentElement.classList.remove('not-valid')
@@ -170,56 +171,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })
   /*////////////////////////////////////////////////////////////////////////////////////////////////////*/
-
   // Payment Info section
-  const creditCard = document.getElementById('credit-card')
-  const payForm = document.getElementById('payment')
-  const payPal = document.getElementById('paypal')
-  const bitCoin = document.getElementById('bitcoin')
-  const selectedPay = payForm.value
   // Hide PayPal and Bitcoin initially
   payPal.style.display = 'none'
   bitCoin.style.display = 'none'
   // Shows/hides payment options based on the payment method.
   payForm.addEventListener('change', function () {
-    const selectedPay = payForm.value // Update selectedPay inside the event listener
-
+    let selectedPay = payForm.value
     if (selectedPay === 'credit-card') {
       payPal.style.display = 'none'
       bitCoin.style.display = 'none'
       creditCard.style.display = 'block' // Display credit card fields
     } else if (selectedPay === 'paypal') {
       payPal.style.display = 'block'
+      payPal.style.visibility = 'visible'
       bitCoin.style.display = 'none'
+      bitCoin.style.visibility = 'hidden'
       creditCard.style.display = 'none' // Hide credit card fields
     } else if (selectedPay === 'bitcoin') {
+      // Display Bitcoin fields
+      payPal.style.visibility = 'hidden'
       payPal.style.display = 'none'
       bitCoin.style.display = 'block'
-      creditCard.style.display = 'none' // Hide credit card fields
+      bitCoin.style.visibility = 'visible'
+      creditCard.style.display = 'none'
     }
   })
   // Set default value to credit card
   payForm.value = 'credit-card'
-
   /*////////////////////////////////////////////////////////////////////////////////////////////////////*/
-  //Accessability
-  for (let i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('focus', (e) => {
-      if (e.target.type === 'checkbox') {
-      checkboxes[i].parentElement.classList.add('focus')
-      registerButton.style.display = 'inline-block'
-      registerButton.style.visibility = 'visible'
-      }
-    })
-    checkboxes[i].addEventListener('blur', (e) => {
-      if (e.target.type === !ischecked) {
-      checkboxes[i].parentElement.classList.remove('focus')
-      registerButton.style.display = 'inline-block'
-      registerButton.style.visibility = 'visible'
-      }
-    })
-  }
-
+  //
   // Function to hide activities checkmark
   function hideActivitiesCheckmark() {
     const existingCheckmark = activitiesBox.querySelector('.checkmark')
@@ -228,10 +209,41 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   activitiesBox.addEventListener('change', (e) => {
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        const isChecked = this.checked
+        const dayAndTime = this.getAttribute('data-day-and-time')
+        // Iterate through all checkboxes to disable conflicting ones
+        checkboxes.forEach((otherCheckbox) => {
+          if (
+            otherCheckbox !== checkbox &&
+            otherCheckbox.getAttribute('data-day-and-time') === dayAndTime
+          ) {
+            otherCheckbox.disabled = isChecked
+          }
+        })
+      })
+      for (let i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener('focus', (e) => {
+          if (e.target.type === 'checkbox') {
+            checkboxes[i].parentElement.classList.add('focus')
+            registerButton.style.display = 'inline-block'
+            registerButton.style.visibility = 'visible'
+          }
+        })
+        checkboxes[i].addEventListener('blur', (e) => {
+          if (e.target.type === !isChecked) {
+            checkboxes[i].parentElement.classList.remove('focus')
+            registerButton.style.display = 'inline-block'
+            registerButton.style.visibility = 'visible'
+          }
+        })
+      }
+    })
     if (e.target.type === 'checkbox') {
-      const isChecked = e.target.checked
+      const ischecked = e.target.checked
       const dataCost = parseInt(e.target.getAttribute('data-cost'), 10)
-      if (isChecked) {
+      if (ischecked) {
         totalCost += dataCost
         applyActivity()
         registerButton.style.display = 'inline-block'
@@ -241,10 +253,10 @@ document.addEventListener('DOMContentLoaded', function () {
         totalCost -= dataCost
         registerButton.style.display = 'inline-block'
         registerButton.style.visibility = 'visible'
+        showError(totalCostElement, 'Please choose a Activity')
       }
       updateTotalCost()
     }
-
     // Update the activities checkmark
     if (totalCost > 0) {
       applyActivity()
@@ -256,13 +268,12 @@ document.addEventListener('DOMContentLoaded', function () {
       hideActivitiesCheckmark()
       activitiesHint.style.display = 'block'
       activitiesHint.style.visibility = 'visible'
+      showError(totalCostElement, 'Please choose a Activity')
     }
     updateTotalCost()
   })
   const registerButton = document.querySelector('button[type="submit"]')
-  activitiesBox.addEventListener('DOMContentLoaded', function () {
-    
-
+  totalCostElement.addEventListener('click', function () {
     if (actValid) {
       registerButton.style.display = 'inline-block'
       registerButton.style.visibility = 'visible'
@@ -272,66 +283,56 @@ document.addEventListener('DOMContentLoaded', function () {
     registerButton.style.visibility = 'visible'
     // Attach an event listener to prevent the default click behavior
     registerButton.addEventListener('click', function (event) {
-
       event.preventDefault()
     })
   })
-
   // Attach submit event listener to the form
   form.addEventListener('submit', function (event) {
     let hasErrors = false
-
-    const nameValue = nameInput.value
-    const emailValue = emailInput_ok.value
-    const cardValue = ccnum.value
-    const zipValue = zipCodeInput.value
-    const cvvValue = cvvInput.value
-
+    const nameValue = nameInput.value.trim()
+    const emailValue = emailInput_ok.value.trim()
+    const cardValue = ccnum.value.trim()
+    const zipValue = zipCodeInput.value.trim()
+    const cvvValue = cvvInput.value.trim()
+    const paypV = payPal
+    const bitboy = bitCoin
     const nameValid = /^[A-Za-z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(nameValue)
     const emailValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue)
-
+    const actValid = totalCost > 0
     const cardValid = /^\d{13,16}$/.test(cardValue)
     const zipValid = /^\d{5}$/.test(zipValue)
     const inputValid = /^\d{3}$/.test(cvvValue)
-
-    const actValid = totalCost > 0
-    
-
     verify(nameValid, nameInput)
     verify(emailValid, emailInput_ok)
-    verify(actValid, activitiesBox)
-
-    if (selectedPay === 'credit-card') {
-      verify(cardValid, ccnum)
-      verify(zipValid, zipCodeInput)
-      verify(inputValid, cvvInput)
-
+    verify(actValid, totalCostElement)
+    verify(cardValid, ccnum)
+    verify(zipValid, zipCodeInput)
+    verify(inputValid, cvvInput)
+    verify(paypV, payPal)
+    verify(bitboy, bitCoin)
+    if (!actValid) {
+      removeActivity()
+      showError(totalCostElement, 'Please choose an activity')
+      hasErrors = true
+    }
+    if (payForm.value === 'credit-card') {
+      // Credit card validation
       if (!cardValid || !zipValid || !inputValid) {
-        showError(ccnum, 'Credit card number, zip code, and CVV are required.')
+        event.preventDefault()
+        showError(
+          creditCardBox,
+          'Credit card number, zip code, and CVV are required.'
+        )
         hasErrors = true
       }
     }
- 
-    if 
-     (!nameValid || !emailValid || !actValid) {
-      showError(
-        nameInput,
-        'Name, email, and at least one activity are required.'
-      )
-      hasErrors = true
-   
-    }
-
-    if (hasErrors) {
+    if (!nameValid || !emailValid || hasErrors) {
       event.preventDefault()
-      registerButton.style.display = 'inline-block'
-      registerButton.style.visibility = 'visible'
+      return false
     } else {
-      registerButton.style.display = 'inline-block'
-      registerButton.style.visibility = 'visible'
-      
+      !hasErrors
+      return true
     }
-    
   })
   /*////////////////////////////////////////////////////////////////////////////////////////////////////*/
 })
