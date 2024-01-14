@@ -58,23 +58,23 @@ document.addEventListener('DOMContentLoaded', function () {
   function veri(validElement, element) {
     const parentElement = element.parentElement
     if (validElement) {
-      parentElement.classList.add('valid')
+      parentElement.lastElementChild.style.display = 'none'
       parentElement.classList.remove('not-valid')
     } else {
       parentElement.classList.add('not-valid')
-      parentElement.classList.remove('valid')
+      parentElement.lastElementChild.style.display = 'block'
     }
   }
 
   function verify(validElement, element) {
     const parentElement = element.parentElement
     if (validElement) {
-      parentElement.classList.add('valid')
+      parentElement.parentElement.classList.add('valid')
       parentElement.classList.remove('not-valid')
       parentElement.lastElementChild.style.display = 'none'
     } else {
       parentElement.classList.add('not-valid')
-      parentElement.classList.remove('valid')
+      parentElement.parentElement.classList.remove('valid')
       parentElement.lastElementChild.style.display = 'block'
     }
   }
@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', function () {
       setColorOptions(['tomato', 'steelblue', 'dimgrey'])
     } else if (design.value === 'js puns') {
       setColorOptions(['cornflowerblue', 'darkslategrey', 'gold'])
+    } else {
+      // If no design is selected, disable the Color field again
+      color.setAttribute('disabled', true)
     }
   }
 
@@ -270,12 +273,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputValid = /^\d{3}$/.test(cvvValue)
     verify(nameValid, nameInput)
     verify(emailValid, emailInput_ok)
-    veri(actValid, totalCostElement)
-    veri(cardValid, ccnum)
-    veri(zipValid, zipCodeInput)
-    veri(inputValid, cvvInput)
-    veri(paypV, payPal)
-    veri(bitboy, bitCoin)
+    verify(actValid, totalCostElement)
+    verify(cardValid, ccnum)
+    verify(zipValid, zipCodeInput)
+    verify(inputValid, cvvInput)
+    verify(paypV, payPal)
+    verify(bitboy, bitCoin)
     if (!actValid) {
       removeActivity()
       showError(totalCostElement, 'Please choose an activity')
