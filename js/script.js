@@ -17,38 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const checkboxes = activitiesBox.querySelectorAll("input[type='checkbox']")
   let totalCost = 0
 
-  function applyTitle() {
-    var el = document.querySelector("label[for='title']")
-    // Set the HTML content with the img tag and src attribute
-    el.innerHTML = `<img src="img/valid.svg" width="20" height="20" alt="valid">`
-    // Insert the img element after the current element
-    el.after()
-  }
-
-  function applySize() {
-    var el = document.querySelector("label[for='size']")
-    // Set the HTML content with the img tag and src attribute
-    el.innerHTML = `<img src="img/valid.svg" width="20" height="20" alt="valid">`
-    // Insert the img element after the current element
-    el.after()
-  }
-
-  function applyDesign() {
-    var el = document.querySelector("label[for='design']")
-    // Set the HTML content with the img tag and src attribute
-    el.innerHTML = `<img src="img/valid.svg" width="20" height="20" alt="valid">`
-    // Insert the img element after the current element
-    el.before()
-  }
-
-  function applyColor() {
-    var el = document.querySelector("label[for='color']")
-    // Set the HTML content with the img tag and src attribute
-    el.innerHTML = `<img src="img/valid.svg" width="20" height="20" alt="valid">`
-    // Insert the img element after the current element
-    el.prepend()
-  }
-
   function removeActivity() {
     const elee = document.querySelector('#activities legend .asterisk')
     // Remove the content of the element
@@ -87,6 +55,17 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   Accessability()
 
+  function veri(validElement, element) {
+    const parentElement = element.parentElement
+    if (validElement) {
+      parentElement.classList.add('valid')
+      parentElement.classList.remove('not-valid')
+    } else {
+      parentElement.classList.add('not-valid')
+      parentElement.classList.remove('valid')
+    }
+  }
+
   function verify(validElement, element) {
     const parentElement = element.parentElement
     if (validElement) {
@@ -102,22 +81,13 @@ document.addEventListener('DOMContentLoaded', function () {
   /*////////////////////////////////////////////////////////////////////////////////////////////////////*/
   // T-Shirt Info
   const color = document.querySelector('#color')
-  const size = document.querySelector('#size')
   const design = document.querySelector('#design')
   // Attach change event listener to update color options
   color.addEventListener('change', function () {
     // Update the Color field based on the selected Design
     updateColorOptions()
   })
-  size.addEventListener('change', function () {
-    applySize()
-  })
-  design.addEventListener('change', function () {
-    applyDesign()
-  })
-  color.addEventListener('change', function () {
-    applyColor()
-  })
+
   design.addEventListener('change', function () {
     // Enable the Color field when a Design is selected
     color.removeAttribute('disabled')
@@ -135,9 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
       setColorOptions(['tomato', 'steelblue', 'dimgrey'])
     } else if (design.value === 'js puns') {
       setColorOptions(['cornflowerblue', 'darkslategrey', 'gold'])
-    } else {
-      // If no design is selected, disable the Color field again
-      color.setAttribute('disabled', true)
     }
   }
 
@@ -145,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Disable color options that are not valid for the current design
     for (let i = 0; i < color.options.length; i++) {
       const optionValue = color.options[i].value
-      color.options[i].disabled = !validColors.includes(optionValue)
+      color.options[i].hidden = !validColors.includes(optionValue)
     }
     // If the currently selected color is not valid, reset the Color field
     if (!validColors.includes(color.value)) {
@@ -167,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       // Hide otherJob for other selections
       otherJob.style.display = 'none'
-      applyTitle()
     }
   })
   /*////////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -304,12 +270,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputValid = /^\d{3}$/.test(cvvValue)
     verify(nameValid, nameInput)
     verify(emailValid, emailInput_ok)
-    verify(actValid, totalCostElement)
-    verify(cardValid, ccnum)
-    verify(zipValid, zipCodeInput)
-    verify(inputValid, cvvInput)
-    verify(paypV, payPal)
-    verify(bitboy, bitCoin)
+    veri(actValid, totalCostElement)
+    veri(cardValid, ccnum)
+    veri(zipValid, zipCodeInput)
+    veri(inputValid, cvvInput)
+    veri(paypV, payPal)
+    veri(bitboy, bitCoin)
     if (!actValid) {
       removeActivity()
       showError(totalCostElement, 'Please choose an activity')
